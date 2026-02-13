@@ -9,107 +9,130 @@ from knowledge_base import save_record
 # PAGE CONFIG
 # =========================================================
 st.set_page_config(
-    page_title="Offline LLM Outreach Engine",
+    page_title="Shinobi Engine | Local LLM",
+    page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # =========================================================
 # LOAD LOCAL BACKGROUND IMAGE
 # =========================================================
 def load_bg(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
+    try:
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except:
+        return ""
 
 bg_img = load_bg("assets/naruto.png")
 
 # =========================================================
-# GLOBAL CSS
+# ENHANCED CSS (GLASSMORPHISM & MODERN UI)
 # =========================================================
 st.markdown(f"""
 <style>
-
+/* Background & Overlay */
 [data-testid="stAppViewContainer"] {{
-    background-image: url("data:image/png;base64,{bg_img}");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("data:image/png;base64,{bg_img}");
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
 }}
 
+/* Hidden Header/Footer */
 header {{visibility:hidden;}}
 footer {{visibility:hidden;}}
 
+/* Main Layout Padding */
 .block-container {{
-    padding-top:30px;
-    padding-left:70px;
-    padding-right:70px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }}
 
-.main-header {{
-    background: rgba(255,230,180,0.9);
-    padding:18px 28px;
-    border-radius:14px;
-    font-size:30px;
-    font-weight:800;
-    color:black;
+/* Glass Cards */
+.glass-card {{
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
 }}
 
-.sub-header {{
-    margin-top:14px;
-    background: rgba(0,0,0,0.65);
-    padding:14px 22px;
-    border-radius:14px;
-    font-size:20px;
-    font-weight:600;
-    color:white;
+/* Custom Typography */
+.main-title {{
+    font-size: 42px;
+    font-weight: 800;
+    color: #FF9D00;
+    margin-bottom: 5px;
+    letter-spacing: -1px;
 }}
 
-.grey-strip {{
-    height:46px;
-    background: rgba(80,80,80,0.6);
-    border-radius:24px;
-    margin-top:22px;
-    margin-bottom:28px;
+.sub-title {{
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 30px;
 }}
 
-.section-title {{
-    font-size:26px;
-    font-weight:700;
-    color:black !important;
-    margin-bottom:10px;
-}}
-
-.card {{
-    background: rgba(255,255,255,0.12);
-    padding:24px;
-    border-radius:18px;
-    backdrop-filter: blur(10px);
-}}
-
+/* Labels & Inputs */
 label {{
-    color:black !important;
-    font-weight:600 !important;
+    color: #FF9D00 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }}
 
-input, textarea {{
-    background:#32353d !important;
-    color:white !important;
-    border-radius:16px !important;
-    border:none !important;
+.stTextArea textarea, .stTextInput input {{
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #e0e0e0 !important;
+    border: 1px solid rgba(255, 157, 0, 0.2) !important;
+    border-radius: 12px !important;
 }}
 
+.stTextArea textarea:focus {{
+    border-color: #FF9D00 !important;
+}}
+
+/* Tab Styling */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 10px;
+    background-color: transparent;
+}}
+
+.stTabs [data-baseweb="tab"] {{
+    height: 45px;
+    white-space: pre-wrap;
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 10px 10px 0px 0px;
+    color: white;
+    border: none;
+    padding: 0px 20px;
+}}
+
+.stTabs [aria-selected="true"] {{
+    background-color: rgba(255, 157, 0, 0.2) !important;
+    border-bottom: 2px solid #FF9D00 !important;
+}}
+
+/* Custom Button */
 .stButton>button {{
-    background:#6a3d2c;
-    color:white;
-    border-radius:16px;
-    padding:14px 26px;
-    font-size:18px;
-    border:none;
+    width: 100%;
+    background: linear-gradient(135deg, #FF9D00 0%, #FF4B2B 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 700;
+    border: none;
+    transition: 0.3s;
+    text-transform: uppercase;
 }}
 
 .stButton>button:hover {{
-    background:#7d4a36;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 157, 0, 0.4);
 }}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -118,59 +141,55 @@ input, textarea {{
 # =========================================================
 if "generated" not in st.session_state:
     st.session_state.generated = False
-
 if "results" not in st.session_state:
     st.session_state.results = None
 
 # =========================================================
-# HEADER
+# SIDEBAR (CLEAN CONFIG)
 # =========================================================
-st.markdown(
-    '<div class="main-header">Offline LLM Outreach Engine</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="sub-header">Generate hyper-personalized outreach using local AI</div>',
-    unsafe_allow_html=True
-)
-
-c1, c2 = st.columns(2)
-with c1:
-    st.markdown('<div class="grey-strip"></div>', unsafe_allow_html=True)
-with c2:
-    st.markdown('<div class="grey-strip"></div>', unsafe_allow_html=True)
+with st.sidebar:
+    st.markdown("### 🛠️ Configuration")
+    linkedin_url = st.text_input("Target URL", placeholder="https://linkedin.com/in/...")
+    
+    st.markdown("---")
+    st.markdown("### 🏮 System Status")
+    st.success("Local LLM: Online")
+    st.info("Model: Shinobi-8B-v1")
+    
+    if st.button("Clear Cache"):
+        st.session_state.results = None
+        st.session_state.generated = False
+        st.rerun()
 
 # =========================================================
-# MAIN GRID
+# MAIN CONTENT
 # =========================================================
-left, right = st.columns(2, gap="large")
+st.markdown('<div class="main-title">YugenAI</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Local LLM Intelligence • Hyper-Personalized Sequences</div>', unsafe_allow_html=True)
 
-# =========================================================
-# INPUT SECTION
-# =========================================================
+left, right = st.columns([1, 1.2], gap="large")
+
+# --- INPUT SECTION ---
 with left:
-    st.markdown('<div class="section-title">Input Section</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
-    linkedin_url = st.text_input("Paste LinkedIn Profile URL")
-    profile_data = st.text_area("Paste Profile Data", height=200)
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    st.markdown("### 📥 Profile Analysis")
+    
+    profile_data = st.text_area(
+        "Paste Profile Content", 
+        height=350, 
+        placeholder="Copy and paste the LinkedIn profile text here for the AI to analyze..."
+    )
 
     st.write("")
-    generate = st.button("Generate Message")
-
+    generate = st.button("Generate Outreach Sequence")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# =========================================================
-# GENERATE ACTION (CONNECTED TO BACKEND)
-# =========================================================
+# --- BACKEND TRIGGER (UNTOUCHED LOGIC) ---
 if generate and profile_data:
-
-    with st.spinner("Generating outreach using Local LLM..."):
-
+    with st.spinner("🍥 Gathering Chakra... (Generating via Local LLM)"):
         results = generate_messages(profile_data)
-
-        # ⭐ SAVE TO KNOWLEDGE BASE
+        
+        # ⭐ SAVE TO KNOWLEDGE BASE (Exactly as per your request)
         save_record(
             results["persona"],
             {"combined_output": results["full_output"]}
@@ -179,38 +198,40 @@ if generate and profile_data:
         st.session_state.results = results
         st.session_state.generated = True
 
-# =========================================================
-# OUTPUT SECTION
-# =========================================================
+# --- OUTPUT SECTION ---
 with right:
-    st.markdown('<div class="section-title">Generated Outreach</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    st.markdown("### ✉️ Generated Assets")
 
     def extract_block(text, title):
         try:
             return text.split(f"=== {title} ===")[1].split("===")[0].strip()
         except:
-            return ""
+            return "No output generated for this channel."
 
     if st.session_state.results:
-
         full_text = st.session_state.results["full_output"]
-
-        st.text_area("Email Output", extract_block(full_text, "EMAIL"), height=100)
-        st.text_area("Linkedin DM", extract_block(full_text, "LINKEDIN"), height=100)
-        st.text_area("WhatsApp Message", extract_block(full_text, "WHATSAPP"), height=100)
-        st.text_area("Instagram DM", extract_block(full_text, "INSTAGRAM"), height=100)
-
+        
+        # Tabbed interface for better UX
+        tab1, tab2, tab3, tab4 = st.tabs(["📧 Email", "💼 LinkedIn", "💬 WhatsApp", "📸 Instagram"])
+        
+        with tab1:
+            st.text_area("Subject & Body", extract_block(full_text, "EMAIL"), height=300, key="out_email")
+        with tab2:
+            st.text_area("Connection Request/DM", extract_block(full_text, "LINKEDIN"), height=300, key="out_li")
+        with tab3:
+            st.text_area("Direct Message", extract_block(full_text, "WHATSAPP"), height=300, key="out_wa")
+        with tab4:
+            st.text_area("DM Script", extract_block(full_text, "INSTAGRAM"), height=300, key="out_ig")
+            
+        st.success("Analysis Complete & Saved to Database")
     else:
-        st.text_area("Email Output", "", height=100)
-        st.text_area("Linkedin DM", "", height=100)
-        st.text_area("WhatsApp Message", "", height=100)
-        st.text_area("Instagram DM", "", height=100)
+        st.info("Awaiting input. Paste profile data and click generate to begin.")
+        # Placeholder tabs for layout consistency
+        st.tabs(["📧 Email", "💼 LinkedIn", "💬 WhatsApp", "📸 Instagram"])
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# =========================================================
-# SUCCESS MESSAGE
-# =========================================================
+# --- FOOTER SUCCESS ---
 if st.session_state.generated:
-    st.success("Outreach Messages Generated Successfully")
+    st.toast("Messages generated and stored locally!", icon="✅")

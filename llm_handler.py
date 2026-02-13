@@ -13,10 +13,10 @@ def generate_with_llm(prompt):
                 "stream": False,
                 "options": {
                     "temperature": 0.5,
-                    "num_predict": 150   # Reduced tokens for speed
+                    "num_predict": 400   # Increased for full multi-message generation
                 }
             },
-            timeout=120  # Increased timeout to prevent early kill
+            timeout=180  # Extra buffer for local model
         )
 
         response.raise_for_status()

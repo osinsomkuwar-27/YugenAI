@@ -21,28 +21,34 @@ Rules:
 - Do NOT repeat sentences.
 - Keep responses concise.
 - Match the tone: {persona.get('tone', '')}.
-- Each message must include one clear CTA.
+- Each message must include exactly ONE clear CTA.
+- You MUST generate ALL four sections completely.
+- Do NOT stop early.
+- Do NOT summarize.
+- Do NOT merge sections.
 
-Now generate ALL of the following clearly separated with headings:
+Generate the following:
 
 1. Cold Email (under 120 words, include subject line)
 2. WhatsApp Message (under 60 words)
 3. LinkedIn DM (under 80 words)
 4. Instagram DM (under 70 words)
 
-Format exactly like this:
+Strict output format:
 
 === EMAIL ===
-<email here>
+<full email here>
 
 === WHATSAPP ===
-<whatsapp here>
+<full whatsapp message here>
 
 === LINKEDIN ===
-<linkedin here>
+<full linkedin dm here>
 
 === INSTAGRAM ===
-<instagram here>
+<full instagram dm here>
+
+Ensure all four sections are present before finishing.
 """
 
     full_output = generate_with_llm(combined_prompt)

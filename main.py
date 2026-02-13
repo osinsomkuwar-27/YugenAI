@@ -1,4 +1,6 @@
 from message_generator import generate_messages
+from knowledge_base import save_record
+
 
 if __name__ == "__main__":
     sample_profile = """
@@ -13,15 +15,15 @@ if __name__ == "__main__":
     print("\n===== Extracted Persona =====")
     print(results["persona"])
 
-    print("\n===== Cold Email =====")
-    print(results["email"])
+    print("\n===== Generated Messages =====")
+    print(results["full_output"])
 
-    print("\n===== WhatsApp Message =====")
-    print(results["whatsapp"])
+    # Save to knowledge base
+    save_record(
+        results["persona"],
+        {
+            "combined_output": results["full_output"]
+        }
+    )
 
-    print("\n===== LinkedIn DM =====")
-    print(results["linkedin"])
-
-    print("\n===== Instagram DM =====")
-    print(results["instagram"])
-
+    print("\n✅ Record saved to knowledge_base.json")

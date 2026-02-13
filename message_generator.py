@@ -6,7 +6,7 @@ def generate_messages(profile_text):
 
     persona = extract_persona(profile_text)
 
-    base_prompt = f"""
+    combined_prompt = f"""
 You are an expert outreach copywriter.
 
 STRICTLY use these details:
@@ -22,41 +22,32 @@ Rules:
 - Keep responses concise.
 - Match the tone: {persona.get('tone', '')}.
 - Each message must include one clear CTA.
+
+Now generate ALL of the following clearly separated with headings:
+
+1. Cold Email (under 120 words, include subject line)
+2. WhatsApp Message (under 60 words)
+3. LinkedIn DM (under 80 words)
+4. Instagram DM (under 70 words)
+
+Format exactly like this:
+
+=== EMAIL ===
+<email here>
+
+=== WHATSAPP ===
+<whatsapp here>
+
+=== LINKEDIN ===
+<linkedin here>
+
+=== INSTAGRAM ===
+<instagram here>
 """
 
-    # 📧 Cold Email
-    email_prompt = base_prompt + """
-Generate a personalized Cold Email.
-Keep it under 120 words.
-Include subject line.
-"""
-
-    # 💬 WhatsApp
-    whatsapp_prompt = base_prompt + """
-Generate a short WhatsApp message.
-Keep it under 60 words.
-Make it conversational.
-"""
-
-    # 🔗 LinkedIn DM
-    linkedin_prompt = base_prompt + """
-Generate a LinkedIn DM.
-Professional but friendly.
-Keep it under 80 words.
-"""
-
-    # 📸 Instagram DM
-    instagram_prompt = base_prompt + """
-Generate an Instagram DM.
-Keep it short, engaging, slightly casual.
-Under 70 words.
-Sound natural and friendly.
-"""
+    full_output = generate_with_llm(combined_prompt)
 
     return {
         "persona": persona,
-        "email": generate_with_llm(email_prompt),
-        "whatsapp": generate_with_llm(whatsapp_prompt),
-        "linkedin": generate_with_llm(linkedin_prompt),
-        "instagram": generate_with_llm(instagram_prompt)
+        "full_output": full_output
     }

@@ -5,6 +5,8 @@ Offline LLM-Powered Hyper-Personalized Cold Outreach Engine
 Problem Statement ID: SBM02 – Social Booster Media Domain
 Xenia Hackathon 2026
 
+Youtube Video Link: https://youtu.be/vTZFCXxtjWo?si=SmGhVx0v9avXK50o
+
 ## Streamlit UI Preview
 
 ![YugenAI UI](assets/Streamline_ui.jpeg)

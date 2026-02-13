@@ -1,8 +1,13 @@
 🚀 YŪGENAI
 
 Offline LLM-Powered Hyper-Personalized Cold Outreach Engine
+
 Problem Statement ID: SBM02 – Social Booster Media Domain
 Xenia Hackathon 2026
+
+## 🖥️ Streamlit UI Preview
+
+![YugenAI UI](assets/Streamline_ui.jpeg)
 
 📌 Overview
 
@@ -49,3 +54,42 @@ It Generates:
 Stores persona and outreach data locally for adaptive memory reuse
 
 Secure. Offline. Intelligent. Multi-Channel Outreach — Powered by Persona-Aware AI.
+
+⚙️ Installation & Setup
+1️⃣ Install Ollama
+
+Download and install:
+```bash
+👉 https://ollama.com
+```
+
+Verify:
+```bash
+ollama --version
+```
+
+3️⃣ Clone Repository
+```bash
+git clone https://github.com/yourusername/yugenai.git
+cd yugenai
+```
+
+4️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+OR manually install Streamlit:
+```bash
+pip install streamlit
+```
+
+5️⃣ Run the Streamlit App
+```bash
+streamlit run app.py
+```
+
+Your browser will automatically open at:
+```bash
+http://localhost:8501
+```

@@ -6,7 +6,7 @@ def extract_persona(profile_text):
     profile_text = profile_text.strip()
     lines = profile_text.split("\n")
 
-    # Name (first line assumption for demo)
+    # Name
     persona["name"] = lines[0].strip() if len(lines) > 0 else "Unknown"
 
     # Role Detection
@@ -37,14 +37,17 @@ def extract_persona(profile_text):
     if any(emoji in profile_text for emoji in ["🚀", "🔥", "✨", "💡"]):
         persona["tone"] = "Casual"
         persona["emoji_usage"] = "High"
+        persona["style_hint"] = "friendly and energetic"
     elif re.search(r"\bpassionate\b|\bbuilding\b", profile_text, re.IGNORECASE):
         persona["tone"] = "Semi-Casual"
         persona["emoji_usage"] = "Medium"
+        persona["style_hint"] = "modern and conversational"
     else:
         persona["tone"] = "Professional"
         persona["emoji_usage"] = "Low"
+        persona["style_hint"] = "formal and structured"
 
-    # Interest Extraction (simple keyword detection)
+    # Interest Extraction
     keywords = ["AI", "Startups", "Automation", "Fintech", "SaaS", "Marketing"]
     interests = []
     for word in keywords:

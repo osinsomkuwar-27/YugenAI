@@ -7,7 +7,7 @@ Xenia Hackathon 2026
 
 ## Streamlit UI Preview
 
-![YugenAI UI](assets/streamline_ui.jpeg)
+![YugenAI UI](assets/)
 
 ## Generated Outreach Response
 ![YugenAI UI](assets/ui_.jpeg)

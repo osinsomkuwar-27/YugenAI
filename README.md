@@ -1,7 +1,9 @@
 🚀 YŪGENAI
+
 Offline LLM-Powered Hyper-Personalized Cold Outreach Engine
 Problem Statement ID: SBM02 – Social Booster Media Domain
 Xenia Hackathon 2026
+
 📌 Overview
 
 Cold outreach remains one of the most widely used strategies for connecting with customers, partners, and talent. However, most outreach today is generic, poorly personalized, tone-mismatched, and heavily dependent on cloud-based AI services — raising concerns around privacy, cost, and scalability.
@@ -12,21 +14,19 @@ YūgenAI is a privacy-first, fully offline LLM-powered outreach engine that gene
 
 Design and build an offline cold outreach automation system that:
 
-Runs entirely on a locally hosted LLM
+1. Runs entirely on a locally hosted LLM
 
-Generates multi-channel personalized outreach
+2. Generates multi-channel personalized outreach
 
-Adapts tone based on recipient communication style
+3. Adapts tone based on recipient communication style
 
-Stores and reuses previous outreach intelligence
+4. Stores and reuses previous outreach intelligence
 
-Operates without any external AI API dependency
+5. Operates without any external AI API dependency
 
 💡 Our Solution
 
-YūgenAI transforms cold outreach from template-based messaging into intelligent, context-aware communication.
-
-The system:
+YūgenAI transforms cold outreach from template-based messaging into intelligent, context-aware communication. The system:
 
 Accepts LinkedIn profile text or mock profile data
 
@@ -36,7 +36,7 @@ Infers communication style automatically
 
 Uses a fully offline LLM (via Ollama)
 
-Generates:
+It Generates:
 
 📧 Cold Email
 

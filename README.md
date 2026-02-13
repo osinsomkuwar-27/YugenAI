@@ -1,5 +1,5 @@
-🚀 PersonaForge
-Offline LLM-Powered Hyper-Personalized Cold Outreach Engine
+#🚀YūgenAI:
+#Offline LLM-Powered Hyper-Personalized Cold Outreach Engine
 
 Problem Statement ID: SBM02 – Social Booster Media Domain
 Xenia Hackathon 2026
@@ -59,6 +59,8 @@ Uses an offline LLM to generate:
 💬 WhatsApp Message
 
 🔗 LinkedIn DM
+
+📸 Instagram DM
 
 Stores persona + generated messages locally for knowledge reuse
 

@@ -213,7 +213,6 @@ st.markdown("""
 
 if not st.session_state.generated:
     # --- VIEW 1: INPUT TERMINAL ---
-    st.markdown("<div class='terminal-card'>", unsafe_allow_html=True)
     st.markdown("<div style='color:#FF9D00; font-family:JetBrains Mono; margin-bottom: 10px;'>&gt; _ INTEL_INPUT</div>", unsafe_allow_html=True)
     
     profile_raw = st.text_area(

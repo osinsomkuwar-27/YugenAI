@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;900&display=swap');
+
+body {
+  background-color: #050505;
+  color: #ffffff;
+  cursor: crosshair;
+}
+
+.font-orbitron { font-family: 'Orbitron', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Custom Terminal Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #FF9D00; border-radius: 10px; }
+
+/* Noise Texture Overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 50;
+}

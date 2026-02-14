@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #050505;
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  overflow-x: hidden;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #FF9D0044;
+  border-radius: 10px;
+}
+
+/* ===== YUGEN TERMINAL FX ===== */
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.02),
+    rgba(255,255,255,0.02) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0.15;
+  z-index: 1;
+}
+
+@keyframes yugenBlink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.yugen-cursor::after {
+  content: "_";
+  margin-left: 6px;
+  animation: yugenBlink 1s infinite;
+  color: #FF9D00;
+}

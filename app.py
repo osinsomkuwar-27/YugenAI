@@ -9,7 +9,7 @@ from knowledge_base import save_record
 # 01. PAGE CONFIG & SESSION INITIALIZATION
 # =========================================================
 st.set_page_config(
-    page_title="Shinobi Engine v3 | Local LLM",
+    page_title="YugenAI",
     page_icon="🏮",
     layout="wide",
     initial_sidebar_state="expanded"

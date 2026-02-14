@@ -10,3 +10,5 @@ knowledge_base.json
 Thumbs.db
 .vscode/
 *.log
+frontend/node_modules/
+dist/

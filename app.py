@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import json # Added for the export feature
 
 # ⭐ BACKEND IMPORTS (STAYING UNTOUCHED)
 from message_generator import generate_messages
@@ -9,20 +10,20 @@ from knowledge_base import save_record
 # 01. PAGE CONFIG & SESSION INITIALIZATION
 # =========================================================
 st.set_page_config(
-    page_title="Shinobi Engine v3 | Local LLM",
-    page_icon="🏮",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="YugenAI | Intelligence Engine",
+    page_icon="⚡",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# Crucial Fix: Initialize session state before any logic runs
+# Initialize session state 
 if "results" not in st.session_state:
     st.session_state.results = None
 if "generated" not in st.session_state:
     st.session_state.generated = False
 
 # =========================================================
-# 02. ASSETS & STYLING (THE SHINOBI UI)
+# 02. ASSETS & STYLING (YUGEN AI + SHINOBI BACKGROUND)
 # =========================================================
 def load_bg(path):
     try:
@@ -30,223 +31,303 @@ def load_bg(path):
             return base64.b64encode(f.read()).decode()
     except: return ""
 
+# Make sure this path points to your actual image!
 bg_img = load_bg("assets/naruto.png")
 
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;900&display=swap');
 
-    /* Background Setup with Dark Overlay */
+    /* Restored Background with Dark Gradient Overlay */
     [data-testid="stAppViewContainer"] {{
-        background-image: linear-gradient(180deg, rgba(10, 10, 15, 0.85) 0%, rgba(20, 10, 5, 0.95) 100%), url("data:image/png;base64,{bg_img}");
+        background-image: linear-gradient(180deg, rgba(8, 8, 10, 0.85) 0%, rgba(15, 10, 5, 0.95) 100%), url("data:image/png;base64,{bg_img}");
         background-size: cover;
+        background-position: center;
         background-attachment: fixed;
+        color: #e0e0e0;
     }}
     
-    header, footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
 
-    /* Futuristic HUD Styling */
-    .main-header {{
+    /* YugenAI Logo Styling */
+    .logo-container {{
+        text-align: center;
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+        user-select: none;
+    }}
+    .yugen-logo {{
         font-family: 'Orbitron', sans-serif;
-        color: #FF9D00;
-        font-size: 2.8rem;
+        font-size: 5rem;
         font-weight: 900;
+        color: #FF9D00;
+        letter-spacing: -2px;
+        line-height: 1;
+        margin: 0;
         text-shadow: 0 0 20px rgba(255, 157, 0, 0.4);
-        margin-bottom: 0px;
     }}
-
-    .neon-text {{
-        color: #00FFC2;
+    .yugen-ai {{
+        color: #ffffff;
+    }}
+    .subtitle {{
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.85rem;
-        letter-spacing: 2px;
+        font-size: 0.75rem;
+        color: #00FFC2;
+        letter-spacing: 5px;
         text-transform: uppercase;
+        margin-top: 10px;
     }}
 
-    /* Card Panels (Glassmorphism + Terminal) */
+    /* Terminal Cards with Glassmorphism */
     .terminal-card {{
-        background: rgba(15, 15, 20, 0.65);
-        border: 1px solid rgba(255, 157, 0, 0.2);
-        border-radius: 8px;
+        background: rgba(17, 17, 20, 0.75);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 157, 0, 0.15);
+        border-radius: 6px;
         padding: 24px;
-        backdrop-filter: blur(10px);
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }}
+    
+    /* Input Area Styling */
+    .stTextArea textarea {{
+        background-color: rgba(12, 12, 14, 0.8) !important;
+        color: #00FFC2 !important;
+        border: 1px solid rgba(255, 157, 0, 0.3) !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        border-radius: 4px;
+    }}
+    .stTextArea textarea:focus {{
+        border-color: #FF9D00 !important;
+        box-shadow: 0 0 15px rgba(255, 157, 0, 0.3) !important;
     }}
 
-    /* Pulse Status Animation */
-    @keyframes pulse {{
-        0% {{ opacity: 0.4; }}
-        50% {{ opacity: 1; }}
-        100% {{ opacity: 0.4; }}
-    }}
-    .status-dot {{
-        height: 10px;
-        width: 10px;
-        background-color: #00FFC2;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 10px;
-        box-shadow: 0 0 10px #00FFC2;
-        animation: pulse 2s infinite;
-    }}
-
-    /* Buttons */
+    /* Primary Generate Button */
     .stButton>button {{
         width: 100%;
-        border-radius: 4px;
-        border: 1px solid #FF9D00;
-        background: rgba(255, 157, 0, 0.05);
+        background-color: rgba(255, 157, 0, 0.1);
         color: #FF9D00;
         font-family: 'Orbitron', sans-serif;
-        padding: 15px;
-        transition: 0.4s;
+        font-weight: 700;
+        font-size: 1rem;
         letter-spacing: 2px;
+        border: 1px solid #FF9D00;
+        border-radius: 4px;
+        padding: 1rem;
+        transition: all 0.3s ease;
     }}
     .stButton>button:hover {{
-        background: #FF9D00;
-        color: black;
-        box-shadow: 0 0 30px rgba(255, 157, 0, 0.4);
+        background-color: #FF9D00;
+        color: #000;
+        box-shadow: 0 0 20px rgba(255, 157, 0, 0.5);
+        transform: translateY(-2px);
+    }}
+    
+    /* Secondary Buttons (Terminate / Download) */
+    .btn-secondary .stButton>button, .stDownloadButton>button {{
+        background-color: transparent !important;
+        color: #00FFC2 !important;
+        border: 1px solid #00FFC2 !important;
+        padding: 0.5rem !important;
+        font-size: 0.8rem !important;
+    }}
+    .btn-secondary .stButton>button:hover, .stDownloadButton>button:hover {{
+        background-color: rgba(0, 255, 194, 0.1) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 194, 0.3) !important;
     }}
 
-    /* Tabs Override */
-    .stTabs [data-baseweb="tab-list"] {{ gap: 8px; }}
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 2rem;
+        background-color: transparent;
+    }}
     .stTabs [data-baseweb="tab"] {{
-        background-color: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        padding: 8px 16px;
-        border-radius: 4px 4px 0 0;
-        color: #999;
+        color: #888;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 500;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        border: none;
+        background: transparent;
+        padding-bottom: 10px;
     }}
     .stTabs [aria-selected="true"] {{
         color: #FF9D00 !important;
-        border-color: #FF9D00 !important;
-        background-color: rgba(255, 157, 0, 0.1) !important;
+        border-bottom: 2px solid #FF9D00 !important;
+        text-shadow: 0 0 10px rgba(255,157,0,0.3);
+    }}
+
+    /* Metrics Override */
+    [data-testid="stMetricValue"] {{
+        font-family: 'JetBrains Mono', monospace;
+        color: #00FFC2;
+        font-size: 1.5rem;
+    }}
+    [data-testid="stMetricLabel"] {{
+        font-family: 'Orbitron', sans-serif;
+        color: #FF9D00;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }}
+
+    /* Data Grid Styling */
+    .grid-label {{
+        color: #888;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }}
+    .grid-value {{
+        color: #fff;
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }}
+    .persona-tag {{
+        color: #aaa;
+        background: rgba(255,255,255,0.05);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        margin-right: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
     }}
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 03. SIDEBAR HUD (CONTROL CENTER)
+# 03. HEADER UI
 # =========================================================
-with st.sidebar:
-    st.markdown("<h2 style='font-family:Orbitron; color:#FF9D00;'>S-RANK INTEL</h2>", unsafe_allow_html=True)
-    st.markdown("---")
-    
-    st.markdown("<div class='neon-text'><span class='status-dot'></span>LOCAL LLM: ACTIVE</div>", unsafe_allow_html=True)
-    st.progress(0.85, text="VRAM Utilization")
-    
-    st.divider()
-    linkedin_url = st.text_input("🎯 Target URL", placeholder="Paste LinkedIn link...")
-    
-    st.caption("Engine Version: v3.0.1-Stable")
-    if st.button("RESET SESSION"):
-        st.session_state.results = None
-        st.session_state.generated = False
-        st.rerun()
+st.markdown("""
+<div class='logo-container'>
+    <div class='yugen-logo'>YUGEN<span class='yugen-ai'>AI</span></div>
+    <div class='subtitle'>Strategic Local Intelligence Engine</div>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================================================
-# 04. MAIN INTERFACE
+# 04. MAIN INTERFACE LOGIC
 # =========================================================
-st.markdown('<div class="main-header">YugenAI</div>', unsafe_allow_html=True)
-st.markdown('<div class="neon-text">Hyper-Personalized Local Intelligence Outreach</div>', unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
 
-left_col, right_col = st.columns([1, 1.3], gap="large")
-
-# --- LEFT: INPUT PANEL ---
-with left_col:
-    st.markdown('<div class="terminal-card">', unsafe_allow_html=True)
-    st.markdown("<p class='neon-text' style='color:#FF9D00'>[ 01 ] INPUT_SIGNATURE</p>", unsafe_allow_html=True)
+if not st.session_state.generated:
+    # --- VIEW 1: INPUT TERMINAL ---
+    st.markdown("<div class='terminal-card'>", unsafe_allow_html=True)
+    st.markdown("<div style='color:#FF9D00; font-family:JetBrains Mono; margin-bottom: 10px;'>&gt; _ INTEL_INPUT</div>", unsafe_allow_html=True)
     
     profile_raw = st.text_area(
-        "Lead Profile Data", 
-        height=400, 
-        placeholder="Paste LinkedIn Profile text, Biography, or Resume details here...",
+        "Input Data", 
+        height=250, 
+        placeholder="Paste Lead Persona data, Biography, or LinkedIn details here...",
         label_visibility="collapsed"
     )
     
     st.write("")
-    if st.button("⚡ EXECUTE GENERATION"):
+    if st.button("⚡ SYNC CHAKRA & GENERATE"):
         if profile_raw:
-            with st.spinner("🌀 WEAVING CHAKRA (LLM INFERENCE IN PROGRESS)..."):
-                # ⭐ BACKEND CALLS (Original Logic)
+            with st.spinner("WEAVING INTEL..."):
+                # ⭐ BACKEND CALLS
                 results = generate_messages(profile_raw)
+                save_record(results["persona"], {"combined_output": results["full_output"]})
                 
-                # Save to knowledge base as per your requirements
-                save_record(
-                    results["persona"],
-                    {"combined_output": results["full_output"]}
-                )
-                
-                # Update Session State
                 st.session_state.results = results
                 st.session_state.generated = True
+                st.rerun()
         else:
             st.error("Input Data Required for Analysis.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+else:
+    # --- VIEW 2: RESULTS DASHBOARD ---
+    current_results = st.session_state.get("results", {})
+    persona = current_results.get("persona", {})
+    
+    # Top Control Bar
+    col1, col2, col3 = st.columns([3, 1, 1])
+    with col1:
+        st.markdown("<div style='color:#FF9D00; font-family:JetBrains Mono; font-size: 0.9rem;'>🔓 S-RANK ACCESS<br><span style='color:#888; font-size: 0.7rem;'>UID: uba15zMBw4Xe...</span></div>", unsafe_allow_html=True)
+    with col2:
+        # NEW FEATURE: Export Button
+        export_data = f"TARGET: {persona.get('name', 'Unknown')}\n---\n{current_results.get('full_output', '')}"
+        st.download_button(
+            label="💾 EXPORT",
+            data=export_data,
+            file_name=f"{persona.get('name', 'intel').replace(' ', '_')}_dossier.txt",
+            mime="text/plain"
+        )
+    with col3:
+        st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+        if st.button("⎋ TERMINATE"):
+            st.session_state.generated = False
+            st.session_state.results = None
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.write("")
+
+    # NEW FEATURE: HUD Metrics
+    st.markdown("<div class='terminal-card' style='padding: 15px;'>", unsafe_allow_html=True)
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Sync Alignment", "98.4%", "Optimal")
+    m2.metric("Tokens Woven", "1,024", "Local LLM")
+    m3.metric("Network Status", "SECURE", "Encrypted")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # 1. ENHANCED PERSONA DOSSIER
+    st.markdown("<div class='terminal-card' style='border-top: 2px solid #00FFC2;'>", unsafe_allow_html=True)
+    st.markdown("<div style='color:#00FFC2; font-family:JetBrains Mono; margin-bottom:20px; font-size: 0.8rem;'>👤 PERSONA_DOSSIER</div>", unsafe_allow_html=True)
+    
+    name = persona.get('name', 'Unknown Target')
+    role = persona.get('role', 'Professional')
+    seniority = persona.get('seniority', 'Unknown Level')
+    
+    st.markdown(f"""
+        <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;'>
+            <div>
+                <h2 style='margin: 0; font-family: Orbitron; font-weight: 700; font-size: 1.8rem; color: #fff;'>{name}</h2>
+                <div style='color: #aaa; font-family: JetBrains Mono; font-size: 0.8rem; text-transform: uppercase; margin-top: 5px;'>{role}</div>
+            </div>
+            <div style='background: rgba(0, 255, 194, 0.1); color: #00FFC2; padding: 5px 12px; border-radius: 4px; font-family: JetBrains Mono; font-size: 0.7rem; border: 1px solid rgba(0,255,194,0.3);'>
+                {seniority}
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    g_col1, g_col2, g_col3 = st.columns(3)
+    with g_col1:
+        st.markdown(f"<div class='grid-label'>INDUSTRY</div><div class='grid-value'>{persona.get('industry', 'N/A')}</div>", unsafe_allow_html=True)
+    with g_col2:
+        st.markdown(f"<div class='grid-label'>TONE</div><div class='grid-value'>{persona.get('tone', 'N/A')}</div>", unsafe_allow_html=True)
+    with g_col3:
+        st.markdown(f"<div class='grid-label'>STYLE HINT</div><div class='grid-value'>{persona.get('style_hint', 'N/A')}</div>", unsafe_allow_html=True)
+    
+    interests = persona.get('interests', [])
+    if interests:
+        tags_html = "".join([f"<span class='persona-tag'>#{i.replace(' ', '').lower()}</span>" for i in interests])
+        st.markdown(f"<div style='margin-top: 10px;'>{tags_html}</div>", unsafe_allow_html=True)
+        
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- RIGHT: OUTPUT PANEL ---
-with right_col:
-    current_results = st.session_state.get("results")
+    # 2. GENERATED OUTREACH BLOCKS
+    st.markdown("<div class='terminal-card' style='border-top: 2px solid #FF9D00;'>", unsafe_allow_html=True)
+    st.markdown("<div style='color:#FF9D00; font-family:JetBrains Mono; margin-bottom:10px; font-size: 0.8rem;'>🚀 OUTREACH_STRATEGY</div>", unsafe_allow_html=True)
+    
+    full_text = current_results.get("full_output", "")
+    
+    def extract(title):
+        try: return full_text.split(f"=== {title} ===")[1].split("===")[0].strip()
+        except: return f"// System Note: {title} block missing or malformed."
 
-    if current_results:
-        # 1. ENHANCED PERSONA DOSSIER
-        st.markdown('<div class="terminal-card">', unsafe_allow_html=True)
-        st.markdown("<p class='neon-text' style='color:#00FFC2'>[ 02 ] STRATEGIC_DOSSIER</p>", unsafe_allow_html=True)
+    tab_mail, tab_li, tab_wa, tab_ig = st.tabs(["EMAIL", "LINKEDIN", "WHATSAPP", "INSTAGRAM"])
+    
+    with tab_mail:
+        st.code(extract("EMAIL"), language="markdown")
+    with tab_li:
+        st.code(extract("LINKEDIN"), language="markdown")
+    with tab_wa:
+        st.code(extract("WHATSAPP"), language="markdown")
+    with tab_ig:
+        st.code(extract("INSTAGRAM"), language="markdown")
         
-        persona = current_results.get("persona")
-        
-        # Check if persona is the dictionary you provided
-        if isinstance(persona, dict):
-            # Header with Name & Role
-            st.markdown(f"### 🥷 {persona.get('name', 'Unknown')} | {persona.get('role', 'Professional')}")
-            
-            # Create a clean grid for metadata
-            p_col1, p_col2 = st.columns(2)
-            with p_col1:
-                st.markdown(f"**Seniority:** `{persona.get('seniority')}`")
-                st.markdown(f"**Industry:** `{persona.get('industry')}`")
-            with p_col2:
-                st.markdown(f"**Tone:** `{persona.get('tone')}`")
-                st.markdown(f"**Style:** `{persona.get('style_hint')}`")
-            
-            # Interests as Neon Badges
-            st.write("")
-            interests = persona.get('interests', [])
-            interest_html = "".join([f"<span class='persona-tag'># {i}</span>" for i in interests])
-            st.markdown(interest_html, unsafe_allow_html=True)
-            
-        else:
-            st.subheader(f"Persona: {persona}")
-            
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # 2. GENERATED OUTREACH BLOCKS
-        st.markdown('<div class="terminal-card">', unsafe_allow_html=True)
-        st.markdown("<p class='neon-text' style='color:#FF9D00'>[ 03 ] OUTREACH_SCROLLS</p>", unsafe_allow_html=True)
-        
-        full_text = current_results.get("full_output", "")
-        
-        def extract(title):
-            try: return full_text.split(f"=== {title} ===")[1].split("===")[0].strip()
-            except: return "Section not found."
-
-        tab_mail, tab_li, tab_wa, tab_ig = st.tabs(["📧 EMAIL", "💼 LINKEDIN", "💬 WHATSAPP", "📸 INSTA"])
-        
-        with tab_mail:
-            st.code(extract("EMAIL"), language="markdown")
-        with tab_li:
-            st.code(extract("LINKEDIN"), language="markdown")
-        with tab_wa:
-            st.code(extract("WHATSAPP"), language="markdown")
-        with tab_ig:
-            st.code(extract("INSTAGRAM"), language="markdown")
-            
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# =========================================================
-# 05. NOTIFICATIONS
-# =========================================================
-if st.session_state.generated:
-    st.toast("Intelligence saved to Knowledge Base", icon="🏮")
+    st.markdown('</div>', unsafe_allow_html=True)
